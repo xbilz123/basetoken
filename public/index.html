@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Panel Shop</title>
+  <style>
+    body{background:#0f172a;color:white;font-family:sans-serif;text-align:center}
+    .card{background:#111827;padding:20px;margin:50px auto;width:300px;border-radius:10px}
+    input,select,button{width:100%;padding:10px;margin:5px 0}
+    button{background:red;color:white;border:none}
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Beli Panel</h2>
+  <input id="username" placeholder="Username">
+  <input id="email" placeholder="Email">
+  <select id="paket">
+    <option>1GB - 1K</option>
+    <option>2GB - 2K</option>
+  </select>
+  <button onclick="beli()">Beli</button>
+</div>
+
+<div id="qris"></div>
+
+<script>
+let orderId = null;
+
+async function beli(){
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const paket = document.getElementById('paket').value;
+
+  const res = await fetch('/api/order',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username,email,paket})
+  });
+
+  const data = await res.json();
+  orderId = data.id;
+
+  document.getElementById('qris').innerHTML = `
+    <h3>Scan QRIS</h3>
+    <img src="${data.qris}">
+    <br><button onclick="cek()">Cek Status</button>
+  `;
+}
+
+async function cek(){
+  const res = await fetch('/api/check/' + orderId);
+  const data = await res.json();
+
+  if(data.status === 'PAID'){
+    alert('Pembayaran berhasil! Cek email kamu');
+  }
+}
+</script>
+
+</body>
+  </html>
